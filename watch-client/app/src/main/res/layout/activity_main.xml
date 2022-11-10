@@ -21,33 +21,33 @@
             android:text="1" />
 
         <Button
-            android:id="@+id/button2"
-            android:layout_marginLeft="80dp"
-            android:layout_width="75dp"
-            android:layout_height="50dp"
-            android:text="2" />
-
-        <Button
-            android:id="@+id/button3"
-            android:layout_width="75dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="50dp"
-            android:text="3" />
-
-        <Button
             android:id="@+id/button4"
             android:layout_marginLeft="80dp"
-            android:layout_marginTop="50dp"
             android:layout_width="75dp"
             android:layout_height="50dp"
             android:text="4" />
 
         <Button
+            android:id="@+id/button2"
+            android:layout_width="75dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="50dp"
+            android:text="2" />
+
+        <Button
             android:id="@+id/button5"
+            android:layout_marginLeft="80dp"
+            android:layout_marginTop="50dp"
+            android:layout_width="75dp"
+            android:layout_height="50dp"
+            android:text="5" />
+
+        <Button
+            android:id="@+id/button3"
             android:layout_width="75dp"
             android:layout_height="50dp"
             android:layout_marginTop="105dp"
-            android:text="5" />
+            android:text="3" />
 
         <Button
             android:id="@+id/button6"
