@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 public class BrailleMapping {
      private Map<String, String> alphabetMapping;
+     public String KEY_NOT_FOUND = "KEY_NOT_FOUND";
 
      BrailleMapping() {
          alphabetMapping = new HashMap<String, String>() {{
@@ -43,7 +44,7 @@ public class BrailleMapping {
      }
 
      public String getNumbering(String alphabet){
-         return alphabetMapping.get(alphabet);
+         return alphabetMapping.getOrDefault(alphabet, KEY_NOT_FOUND);
      }
 
      public String getAlphabet(String numbering){
@@ -57,12 +58,7 @@ public class BrailleMapping {
              }
          }
          System.out.println("No Matching Alphabet Found");
-         return null;
+         return KEY_NOT_FOUND;
      }
-
-//     public static void main(String args[]){
-//         BrailleMapping BM = new BrailleMapping();
-//         System.out.print(BM.getNumbering("A"));
-//     }
 }
 
