@@ -1,0 +1,20 @@
+.xraygallery {
+    width:450px;
+    max-width: 100%;
+}
+.xraygallery ul {
+    list-style: none outside none;
+    padding-left: 0;
+    margin-bottom:0;
+}
+.xraygallery li {
+    display: block;
+    float: left;
+    margin-right: 6px;
+    cursor:pointer;
+}
+.xraygallery img {
+    display: block;
+    height: auto;
+    max-width: 100%;
+}
