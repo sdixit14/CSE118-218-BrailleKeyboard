@@ -16,6 +16,7 @@ public class MainActivity extends Activity {
 
     // store the user input
     public static String answer = "";
+    public static String sentences = ""; //next step, store confirmed words to sentences
     public static String KEY_NOT_FOUND = "KEY_NOT_FOUND";
     public static BrailleMapping brailleMapping = new BrailleMapping();
 
@@ -31,6 +32,9 @@ public class MainActivity extends Activity {
         String alphabet = checkAnswer(answer);
         if (!alphabet.equals(KEY_NOT_FOUND)){
             Log.v("Current Alphabet",alphabet);
+        }
+        else{
+            Log.v("No Alphabet",KEY_NOT_FOUND);
         }
     }
 
@@ -61,11 +65,11 @@ public class MainActivity extends Activity {
 
     public static String checkAnswer(String ans){
         String currentAlphabet = brailleMapping.getAlphabet(answer);
+        answer = "";
         if (currentAlphabet.equals(KEY_NOT_FOUND)){
             return KEY_NOT_FOUND;
         }
         else{
-            answer = "";
             return currentAlphabet;
         }
     }
