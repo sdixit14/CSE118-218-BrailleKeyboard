@@ -77,6 +77,26 @@
         android:layout_height="30dp"
         android:layout_marginLeft="60dp"
         android:layout_marginTop="190dp"
-        android:onClick="onButtonConfirm" />
+        android:onClick="onButtonConfirm"
+        android:textSize="9dp"
+        android:text="alphabet"/>
+
+    <Button
+        android:id="@+id/buttonSpace"
+        android:layout_width="110dp"
+        android:layout_height="30dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginTop="10dp"
+        android:onClick="onButtonSpace"
+        android:textSize="9dp"
+        android:text="Space"/>
+
+    <Button
+        android:id="@+id/buttonSentence"
+        android:layout_width="25dp"
+        android:layout_height="110dp"
+        android:layout_marginLeft="190dp"
+        android:layout_marginTop="60dp"
+        android:onClick="onButtonSentence" />
 
 </androidx.wear.widget.BoxInsetLayout>
