@@ -3,11 +3,21 @@ package com.example.braillekeyboard;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
+
+import androidx.wear.input.WearableButtons;
+
 import com.example.braillekeyboard.BrailleMapping;
 
 import com.example.braillekeyboard.databinding.ActivityMainBinding;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
 
@@ -16,6 +26,7 @@ public class MainActivity extends Activity {
 
     // store the user input
     public static String answer = "";
+    public static String sentence = "";
     public static String KEY_NOT_FOUND = "KEY_NOT_FOUND";
     public static BrailleMapping brailleMapping = new BrailleMapping();
 
@@ -29,8 +40,40 @@ public class MainActivity extends Activity {
 
     public void onButtonConfirm(View view){
         String alphabet = checkAnswer(answer);
-        if (!alphabet.equals(KEY_NOT_FOUND)){
-            Log.v("Current Alphabet",alphabet);
+        if (!alphabet.equals(KEY_NOT_FOUND)) {
+            Log.v("Current Alphabet ", alphabet);
+            sentence+=alphabet;
+        }
+    }
+
+    public void onButtonSpace(View view){
+        sentence+=" ";
+    }
+    
+    public void onButtonSentence(View view){
+        Log.v("Current Sentence ", sentence);
+
+        // SEND POST REQUEST
+        try {
+            URL url = new URL("https://balajimt.pythonanywhere.com/addnotepublic");
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setRequestMethod("POST");
+            http.setDoOutput(true);
+            http.setRequestProperty("Content-Type", "application/json");
+
+            String data = String.format("{\"username\":\"elle_admin\",\n\"licensekey\": \"SEUSSGEISEL\",\n \"note\": \"%s\"\n} ",sentence);
+            Log.v("Data is ", data);
+
+            byte[] out = data.getBytes(StandardCharsets.UTF_8);
+
+            //some errors HERE
+            OutputStream stream = http.getOutputStream();
+            stream.write(out);
+
+            System.out.println(http.getResponseCode() + " " + http.getResponseMessage());
+            http.disconnect();
+        } catch(IOException ex){
+            Log.v("Unsuccessful", "IO Exception");
         }
     }
 
@@ -69,5 +112,17 @@ public class MainActivity extends Activity {
             return currentAlphabet;
         }
     }
+
+//    @Override (Considered physical buttons but hard to test on the emulator
+//// Activity
+//    public boolean onKeyDown(int keyCode, KeyEvent event){
+//        if (event.getRepeatCount() == 0) {
+//            if (keyCode == KeyEvent.KEYCODE_STEM_1) {
+//                // Do stuff
+//                return true;
+//            }
+//        }
+//        return super.onKeyDown(keyCode, event);
+//    }
 
 }
