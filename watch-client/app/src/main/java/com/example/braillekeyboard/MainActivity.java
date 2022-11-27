@@ -9,15 +9,28 @@ import android.widget.TextView;
 
 import androidx.wear.input.WearableButtons;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.braillekeyboard.BrailleMapping;
 
 import com.example.braillekeyboard.databinding.ActivityMainBinding;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends Activity {
 
@@ -49,32 +62,37 @@ public class MainActivity extends Activity {
     public void onButtonSpace(View view){
         sentence+=" ";
     }
-    
+
     public void onButtonSentence(View view){
         Log.v("Current Sentence ", sentence);
+        RequestQueue MyRequestQueue = Volley.newRequestQueue(this);
 
-        // SEND POST REQUEST
-        try {
-            URL url = new URL("https://balajimt.pythonanywhere.com/addnotepublic");
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
-            http.setRequestMethod("POST");
-            http.setDoOutput(true);
-            http.setRequestProperty("Content-Type", "application/json");
+        final String URL = "https://balajimt.pythonanywhere.com/addnotepublic";
+        // Post params to be sent to the server
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("username", "elle_admin");
+        params.put("licensekey", "SEUSSGEISEL");
+        params.put("note", sentence);
 
-            String data = String.format("{\"username\":\"elle_admin\",\n\"licensekey\": \"SEUSSGEISEL\",\n \"note\": \"%s\"\n} ",sentence);
-            Log.v("Data is ", data);
+        JsonObjectRequest request_json = new JsonObjectRequest(URL, new JSONObject(params),
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            System.out.println(response);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+            }
+        });
 
-            byte[] out = data.getBytes(StandardCharsets.UTF_8);
-
-            //some errors HERE
-            OutputStream stream = http.getOutputStream();
-            stream.write(out);
-
-            System.out.println(http.getResponseCode() + " " + http.getResponseMessage());
-            http.disconnect();
-        } catch(IOException ex){
-            Log.v("Unsuccessful", "IO Exception");
-        }
+        // add the request object to the queue to be executed
+        MyRequestQueue.add(request_json);
     }
 
     public void onButtonClick1(View view){
