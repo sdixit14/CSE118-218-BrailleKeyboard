@@ -1,11 +1,13 @@
 package com.example.braillekeyboard;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.wear.input.WearableButtons;
 
@@ -57,10 +59,23 @@ public class MainActivity extends Activity {
             Log.v("Current Alphabet ", alphabet);
             sentence+=alphabet;
         }
+        Context context = getApplicationContext();
+        CharSequence text = sentence;
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
     public void onButtonSpace(View view){
         sentence+=" ";
+
+        Context context = getApplicationContext();
+        CharSequence text = sentence;
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
     public void onButtonSentence(View view){
@@ -74,13 +89,32 @@ public class MainActivity extends Activity {
         params.put("licensekey", "SEUSSGEISEL");
         params.put("note", sentence);
 
+        Context context = getApplicationContext();
+        CharSequence text = "Sending: " + sentence;
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
+
         JsonObjectRequest request_json = new JsonObjectRequest(URL, new JSONObject(params),
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
                             System.out.println(response);
+                            Context context = getApplicationContext();
+                            CharSequence text = response.getString("message");
+                            int duration = Toast.LENGTH_SHORT;
+
+                            Toast toast = Toast.makeText(context, text, duration);
+                            toast.show();
                         } catch (Exception e) {
+                            Context context = getApplicationContext();
+                            CharSequence text = e.getMessage();
+                            int duration = Toast.LENGTH_SHORT;
+
+                            Toast toast = Toast.makeText(context, text, duration);
+                            toast.show();
                             e.printStackTrace();
                         }
                     }
