@@ -245,7 +245,7 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(top = 10.dp),
-                                    onClick = { swipeDismissableNavController.navigate("Another list") },
+                                    onClick = { swipeDismissableNavController.navigate("braille") },
                                     title = { Text("Type notes") },
                                     backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
                                         backgroundImagePainter = painterResource(id = R.drawable.vangogh)
@@ -259,7 +259,7 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(top = 10.dp),
-                                    onClick = { swipeDismissableNavController.navigate("braille") },
+                                    onClick = { swipeDismissableNavController.navigate("Another list") },
                                     title = { Text("Read notes") },
                                     backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
                                         backgroundImagePainter = painterResource(id = R.drawable.vangogh2)
@@ -353,9 +353,6 @@ class MainActivity : ComponentActivity() {
                         var currentCombination = ""
                         var sentence = ""
                         insideBrailleKeyboard = true
-                        var count2 = 0
-                        var count5 = 0
-
 
                         ScalingLazyColumn(modifier = Modifier.fillMaxWidth()) {
                             item {

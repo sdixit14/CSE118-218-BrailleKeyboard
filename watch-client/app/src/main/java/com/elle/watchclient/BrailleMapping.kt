@@ -56,6 +56,6 @@ class BrailleMapping {
     }
 
     fun getAlphabetFromNumberString(a:String):String {
-        return numberMapping.getOrDefault(a, KEY_NOT_FOUND)
+        return numberMapping.getOrDefault(String(a.toCharArray().apply { sort() }), KEY_NOT_FOUND)
     }
 }
