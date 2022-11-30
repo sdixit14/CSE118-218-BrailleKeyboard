@@ -70,5 +70,6 @@ dependencies {
 
     // For integration between Wear Compose and Androidx Navigation libraries
     implementation("androidx.wear.compose:compose-navigation:1.0.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
 }
 

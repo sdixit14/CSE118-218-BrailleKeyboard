@@ -38,6 +38,8 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONObject
+import com.fasterxml.jackson.databind.ObjectMapper
+
 
 
 class MainActivity : ComponentActivity() {
@@ -196,6 +198,7 @@ class MainActivity : ComponentActivity() {
                         toast.setText(text)
                         toast.show()
                         e.printStackTrace()
+                        println(e)
                     }
                 }
             ) { error -> VolleyLog.e("Error: ", error.message) }
@@ -331,6 +334,7 @@ class MainActivity : ComponentActivity() {
                         var selectedPage by remember { mutableStateOf(0) }
                         var messageItem by remember { mutableStateOf(messages[0]) }
                         var finalValue by remember { mutableStateOf(0) }
+                        var painterValue by remember { mutableStateOf(R.drawable.vangogh) }
 
                         val animatedSelectedPage by animateFloatAsState(
                             targetValue = selectedPage.toFloat(),
@@ -350,6 +354,14 @@ class MainActivity : ComponentActivity() {
                         }
 
                         Box(modifier = Modifier.fillMaxSize().padding(6.dp)) {
+                            Button(
+                                onClick = { /* Do something */ },
+                                enabled = true,
+                                modifier = Modifier.size(35.dp).align(Alignment.TopCenter),
+                                colors = ButtonDefaults.primaryButtonColors(Color(0xFFC5DED5))
+                            ) {
+                                Text(text = "elle", color = Color.Black)
+                            }
 
                             InlineSlider(
                                 modifier = Modifier.align(Alignment.Center).height(100.dp),
@@ -359,6 +371,11 @@ class MainActivity : ComponentActivity() {
                                 valueProgression = 0 until maxPages,
                                 onValueChange = { selectedPage = it
                                     messageItem = messages[it]
+                                    if (it%2==1) {
+                                        painterValue = R.drawable.vangogh2
+                                    } else {
+                                        painterValue = R.drawable.vangogh
+                                    }
                                 }
                             )
                             HorizontalPageIndicator(
@@ -366,13 +383,13 @@ class MainActivity : ComponentActivity() {
                             )
                             TitleCard(
                                 modifier = Modifier
-                                    .fillMaxWidth(0.6f)
-                                    .height(80.dp)
-                                    .padding(top = 10.dp).align(Alignment.Center),
+                                    .fillMaxWidth(0.55f)
+                                    .height(90.dp)
+                                    .align(Alignment.Center),
                                 onClick = {  },
                                 title = { Text(messageItem.toString()) },
                                 backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
-                                    backgroundImagePainter = painterResource(id = R.drawable.vangogh)
+                                    backgroundImagePainter = painterResource(id = painterValue)
                                 ),
                                 contentColor = MaterialTheme.colors.onSurface,
                                 titleColor = MaterialTheme.colors.onSurface
