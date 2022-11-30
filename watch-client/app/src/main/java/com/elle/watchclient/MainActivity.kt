@@ -6,6 +6,7 @@ import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,9 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Phone
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,9 +25,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.wear.compose.foundation.CurvedRow
 import androidx.wear.compose.material.*
-import androidx.wear.compose.material.TimeTextDefaults.timeCurvedTextStyle
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -80,21 +77,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @ExperimentalWearMaterialApi
-    @Composable
-    fun SimpleTimeText(
-        contentPadding: PaddingValues = PaddingValues(4.dp)
-    ) {
-        if (LocalConfiguration.current.isScreenRound) {
-            CurvedRow(Modifier.padding(contentPadding)) {
-                CurvedText(
-                    text = "elle",
-                    style = timeCurvedTextStyle()
-                )
-            }
-        }
-    }
-
     @Composable
     fun CustomButton(
         onClick: () -> Unit,
@@ -133,17 +115,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    private fun SampleRow(anchor: Float, modifier: Modifier, vararg textBits: String) {
-        CurvedRow(
-            modifier = modifier.padding(4.dp),
-            anchor = anchor
-        ) {
-            textBits.forEach { CurvedText(it, modifier = Modifier.padding(end = 8.dp)) }
-        }
-    }
-
-
     fun JSONArray.toArrayList(): ArrayList<String> {
         val list = arrayListOf<String>()
         for (i in 0 until this.length()) {
@@ -152,7 +123,6 @@ class MainActivity : ComponentActivity() {
 
         return list
     }
-
 
     @ExperimentalWearMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -304,6 +274,7 @@ class MainActivity : ComponentActivity() {
                                 TitleCard(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .height(100.dp)
                                         .padding(top = 10.dp),
                                     onClick = { swipeDismissableNavController.navigate("braille") },
                                     title = { Text("Type notes") },
@@ -318,6 +289,7 @@ class MainActivity : ComponentActivity() {
                                 TitleCard(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .height(100.dp)
                                         .padding(top = 10.dp),
                                     onClick = { swipeDismissableNavController.navigate("Another list") },
                                     title = { Text("Read notes") },
@@ -355,49 +327,100 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("Another list") {
-                        Scaffold(
-                            timeText = {
-                                TimeText()
-                            },
-                            vignette = {
-                                Vignette(vignettePosition = VignettePosition.TopAndBottom)
-                            },
-                            positionIndicator = {
-                                PositionIndicator(
-                                    scalingLazyListState = ScalingLazyListState()
-                                )
+                        val maxPages = 9
+                        var selectedPage by remember { mutableStateOf(0) }
+                        var messageItem by remember { mutableStateOf(messages[0]) }
+                        var finalValue by remember { mutableStateOf(0) }
 
-                            }
+                        val animatedSelectedPage by animateFloatAsState(
+                            targetValue = selectedPage.toFloat(),
                         ) {
-                            ScalingLazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(
-                                    top = 28.dp,
-                                    start = 10.dp,
-                                    end = 10.dp,
-                                    bottom = 40.dp
-                                ),
-                                verticalArrangement = Arrangement.Center,
-                                state = scalingLazyListState
-                            ) {
-                                items(10) { index ->
-                                    Chip(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 10.dp),
-                                        label = {
-                                            Text(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                color = MaterialTheme.colors.onError,
-                                                text = messages[index]
-                                            )
-                                        },
-                                        onClick = {
-                                        }
-                                    )
-                                }
+                            finalValue = it.toInt()
+                        }
+
+                        val pageIndicatorState: PageIndicatorState = remember {
+                            object : PageIndicatorState {
+                                override val pageOffset: Float
+                                    get() = animatedSelectedPage - finalValue
+                                override val selectedPage: Int
+                                    get() = finalValue
+                                override val pageCount: Int
+                                    get() = maxPages
                             }
                         }
+
+                        Box(modifier = Modifier.fillMaxSize().padding(6.dp)) {
+
+                            InlineSlider(
+                                modifier = Modifier.align(Alignment.Center).height(100.dp),
+                                value = selectedPage,
+                                increaseIcon = { Icon(InlineSliderDefaults.Increase, "Increase", modifier=Modifier.width(50.dp)) },
+                                decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease", modifier=Modifier.width(50.dp)) },
+                                valueProgression = 0 until maxPages,
+                                onValueChange = { selectedPage = it
+                                    messageItem = messages[it]
+                                }
+                            )
+                            HorizontalPageIndicator(
+                                pageIndicatorState = pageIndicatorState
+                            )
+                            TitleCard(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.6f)
+                                    .height(80.dp)
+                                    .padding(top = 10.dp).align(Alignment.Center),
+                                onClick = {  },
+                                title = { Text(messageItem.toString()) },
+                                backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
+                                    backgroundImagePainter = painterResource(id = R.drawable.vangogh)
+                                ),
+                                contentColor = MaterialTheme.colors.onSurface,
+                                titleColor = MaterialTheme.colors.onSurface
+                            ) { }
+                        }
+//                        Scaffold(
+//                            timeText = {
+//                                TimeText()
+//                            },
+//                            vignette = {
+//                                Vignette(vignettePosition = VignettePosition.TopAndBottom)
+//                            },
+//                            positionIndicator = {
+//                                PositionIndicator(
+//                                    scalingLazyListState = ScalingLazyListState()
+//                                )
+//
+//                            }
+//                        ) {
+//                            ScalingLazyColumn(
+//                                modifier = Modifier.fillMaxSize(),
+//                                contentPadding = PaddingValues(
+//                                    top = 28.dp,
+//                                    start = 10.dp,
+//                                    end = 10.dp,
+//                                    bottom = 40.dp
+//                                ),
+//                                verticalArrangement = Arrangement.Center,
+//                                state = scalingLazyListState
+//                            ) {
+//                                items(10) { index ->
+//                                    Chip(
+//                                        modifier = Modifier
+//                                            .fillMaxWidth()
+//                                            .padding(top = 10.dp),
+//                                        label = {
+//                                            Text(
+//                                                modifier = Modifier.fillMaxWidth(),
+//                                                color = MaterialTheme.colors.onError,
+//                                                text = messages[index]
+//                                            )
+//                                        },
+//                                        onClick = {
+//                                        }
+//                                    )
+//                                }
+//                            }
+//                        }
                     }
 
                     composable("braille") {

@@ -4,12 +4,16 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdk 32
+
+    configurations.all {
+        resolutionStrategy { force 'androidx.core:core-ktx:1.6.0' }
+    }
 
     defaultConfig {
         applicationId "com.elle.watchclient"
         minSdk 30
-        targetSdk 31
+        targetSdk 32
         versionCode 1
         versionName "1.0"
 
@@ -24,6 +28,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
         useIR = true
+        freeCompilerArgs += [
+                "-Xjvm-default=all",
+        ]
     }
     buildFeatures {
         compose true
@@ -55,4 +62,13 @@ dependencies {
 
     implementation "androidx.wear:wear-input:1.0.0"
     implementation "com.android.volley:volley:1.2.1"
+
+    implementation("androidx.wear.compose:compose-foundation:1.0.0")
+
+    // For Wear Material Design UX guidelines and specifications
+    implementation("androidx.wear.compose:compose-material:1.0.0")
+
+    // For integration between Wear Compose and Androidx Navigation libraries
+    implementation("androidx.wear.compose:compose-navigation:1.0.0")
 }
+
