@@ -39,6 +39,7 @@ import com.android.volley.RequestQueue
 import com.android.volley.VolleyLog
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import org.json.JSONArray
 import org.json.JSONObject
 
 
@@ -54,6 +55,7 @@ class MainActivity : ComponentActivity() {
         .wrapContentSize(align = Alignment.Center)
 
     var insideBrailleKeyboard = false;
+    var messages = mutableListOf<String>()
 
     @Composable
     fun ButtonExample(
@@ -142,6 +144,16 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    fun JSONArray.toArrayList(): ArrayList<String> {
+        val list = arrayListOf<String>()
+        for (i in 0 until this.length()) {
+            list.add(this.getString(i))
+        }
+
+        return list
+    }
+
+
     @ExperimentalWearMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -157,6 +169,42 @@ class MainActivity : ComponentActivity() {
 
         val toast: Toast = Toast.makeText(this, "Hello", Toast.LENGTH_SHORT)
         val MyRequestQueue: RequestQueue = Volley.newRequestQueue(this)
+
+        fun getNotes() {
+            val URL = "https://balajimt.pythonanywhere.com/viewallnotepublic"
+            val params = mutableMapOf("username" to "elle_admin",
+                "licensekey" to "SEUSSGEISEL"
+            )
+
+            toast.setText("Syncing messages from cloud")
+            toast.show()
+
+            val request_json = JsonObjectRequest(URL, JSONObject(params as Map<*, *>?),
+                { response ->
+                    try {
+                        val jsonArray = response.getJSONArray("messages")
+                        println(jsonArray)
+                        val text: CharSequence = "Synced: " + jsonArray.length() + " messages"
+                        toast.setText(text)
+                        toast.show()
+                        messages = jsonArray.toArrayList().reversed() as MutableList<String>
+                    } catch (e: Exception) {
+                        val text: CharSequence? = e.message
+                        toast.setText(text)
+                        toast.show()
+                        e.printStackTrace()
+                        println(e)
+                    }
+                }
+            ) { error -> println(error) }
+
+            // add the request object to the queue to be executed
+
+            // add the request object to the queue to be executed
+            MyRequestQueue.add(request_json)
+        }
+
+//        getNotes()
 
 
         fun sendNoteMessage(message: String) {
@@ -187,6 +235,7 @@ class MainActivity : ComponentActivity() {
             // add the request object to the queue to be executed
             MyRequestQueue.add(request_json)
         }
+
         setContent {
             MaterialTheme {
                 val scalingLazyListState: ScalingLazyListState = rememberScalingLazyListState()
@@ -214,12 +263,16 @@ class MainActivity : ComponentActivity() {
                     println(buttonInfo.locationZone)
                 }
 
+
                 SwipeDismissableNavHost(
                     navController = swipeDismissableNavController,
                     startDestination = "Landing",
                     modifier = Modifier.background(MaterialTheme.colors.background)
                 ) {
                     composable("Landing") {
+                        getNotes()
+                        println("inside landing")
+                        println(messages)
                         insideBrailleKeyboard = false
                         ScalingLazyColumn(
                             modifier = Modifier.fillMaxSize(),
@@ -332,20 +385,11 @@ class MainActivity : ComponentActivity() {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(top = 10.dp),
-                                        icon = {
-                                            Icon(
-                                                painter = painterResource(id = R.drawable.vangogh),
-                                                contentDescription = "Star",
-                                                modifier = Modifier
-                                                    .size(24.dp)
-                                                    .wrapContentSize(align = Alignment.Center),
-                                            )
-                                        },
                                         label = {
                                             Text(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 color = MaterialTheme.colors.onError,
-                                                text = "Item ${index + 1}"
+                                                text = messages[index]
                                             )
                                         },
                                         onClick = {

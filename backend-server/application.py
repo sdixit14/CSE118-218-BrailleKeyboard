@@ -16,6 +16,8 @@ from flask_mail import Mail, Message
 from constants import *
 from config import Config
 
+import json
+
 # CREATE CUSTOM DIRECTORIES
 Path(DATABASE_DIRECTORY).mkdir(parents=True, exist_ok=True)
 
@@ -195,14 +197,36 @@ def create_user_process():
                                  status_message=status_message,
                                  admin_status=current_user.check_admin())
 
+
+# Publicly exposed API will contain only JSON params
 @application.route('/addnotepublic', methods=['POST'])
 def add_note_to_database():
-    data = request.form
-    username = data.get('username')
-    licensekey = data.get('licensekey')
-    note = data.get('note')
+    data = request.get_json()
+    username = data['username']
+    licensekey = data['licensekey']
+    note = data['note']
     response = safe_note_entry(username, note, licensekey)
     return response
+
+
+# Publicly exposed API will contain only JSON params
+@application.route('/viewallnotepublic', methods=['GET','POST'])
+def view_all_notes():
+    data = request.get_json()
+    if 'username' in data:
+        username = data['username']
+    else:
+        username = 'elle_admin'
+    if 'licensekey' in data:
+        licensekey = data['licensekey']
+    else:
+        licensekey = 'SEUSSGEISEL'
+    response = safe_note_get_all(username, licensekey)
+    list_of_messages = []
+    for i in response:
+        list_of_messages.append(i.notes)
+    return {"status": "SUCCESS", "messages": list_of_messages}
+
 
 @application.route('/addnotetestprocess', methods=['POST'])
 def add_note_to_admin_database():
@@ -215,18 +239,20 @@ def add_note_to_admin_database():
                                  status_message=response["message"],
                                  admin_status=current_user.check_admin())
 
+
 @application.route('/addnotetest', methods=['GET', 'POST'])
 @login_required
 def add_note_admin_test():
     return flask.render_template('create_note.html',
                                  admin_status=current_user.check_admin())
 
+
 @application.route('/notesummary', methods=['GET', 'POST'])
 @login_required
 def note_summary():
     data = Notes.query.filter()
     return flask.render_template('all_notes.html',
-                                 data = data,
+                                 data=data,
                                  admin_status=current_user.check_admin())
 
 

@@ -41,3 +41,11 @@ def safe_note_entry(username, note, license_key):
         except Exception as e:
             print(e)
             return {"status": "FAILURE", "message": "Attempt to add note has failed"}
+
+def safe_note_get_all(username, license_key):
+    user = User.query.filter(User.username == username and User.license_key == license_key).first()
+    if not user:
+        return []
+    else:
+        user_id = user.id
+        return Notes.query.filter(Notes.username == username and Notes.user_id == user_id).all()
