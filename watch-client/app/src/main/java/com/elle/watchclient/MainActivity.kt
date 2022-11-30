@@ -1,7 +1,8 @@
 package com.elle.watchclient
 
-import android.content.Context
-import android.os.*
+import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -19,12 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.*
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
@@ -38,12 +36,9 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONObject
-import com.fasterxml.jackson.databind.ObjectMapper
-
 
 
 class MainActivity : ComponentActivity() {
-
 
 
     val contentModifier = Modifier
@@ -137,14 +132,13 @@ class MainActivity : ComponentActivity() {
             .padding(all = 0.5.dp)
 
         val vibrator = this.getSystemService(VIBRATOR_SERVICE) as Vibrator
-        val canVibrate:Boolean = vibrator.hasVibrator()
-
         val toast: Toast = Toast.makeText(this, "Hello", Toast.LENGTH_SHORT)
         val MyRequestQueue: RequestQueue = Volley.newRequestQueue(this)
 
         fun getNotes() {
             val URL = "https://balajimt.pythonanywhere.com/viewallnotepublic"
-            val params = mutableMapOf("username" to "elle_admin",
+            val params = mutableMapOf(
+                "username" to "elle_admin",
                 "licensekey" to "SEUSSGEISEL"
             )
 
@@ -169,22 +163,17 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             ) { error -> println(error) }
-
-            // add the request object to the queue to be executed
-
             // add the request object to the queue to be executed
             MyRequestQueue.add(request_json)
         }
 
-//        getNotes()
-
-
         fun sendNoteMessage(message: String) {
             val URL = "https://balajimt.pythonanywhere.com/addnotepublic"
-            val params = mutableMapOf("username" to "elle_admin",
+            val params = mutableMapOf(
+                "username" to "elle_admin",
                 "licensekey" to "SEUSSGEISEL",
                 "note" to message
-                )
+            )
 
             val request_json = JsonObjectRequest(URL, JSONObject(params as Map<*, *>?),
                 { response ->
@@ -294,7 +283,7 @@ class MainActivity : ComponentActivity() {
                                         .fillMaxWidth()
                                         .height(100.dp)
                                         .padding(top = 10.dp),
-                                    onClick = { swipeDismissableNavController.navigate("Another list") },
+                                    onClick = { swipeDismissableNavController.navigate("reader") },
                                     title = { Text("Read notes") },
                                     backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
                                         backgroundImagePainter = painterResource(id = R.drawable.vangogh2)
@@ -306,30 +295,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    composable("Detail") {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(
-                                    top = 60.dp,
-                                    start = 8.dp,
-                                    end = 8.dp
-                                ),
-                            verticalArrangement = Arrangement.Top
-                        ) {
-                            Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.CenterHorizontally),
-                                color = MaterialTheme.colors.primary,
-                                textAlign = TextAlign.Center,
-                                fontSize = 22.sp,
-                                text = "Hello from Details Screen"
-                            )
-                        }
-                    }
-
-                    composable("Another list") {
+                    composable("reader") {
                         val maxPages = 9
                         var selectedPage by remember { mutableStateOf(0) }
                         var messageItem by remember { mutableStateOf(messages[0]) }
@@ -353,25 +319,46 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-                        Box(modifier = Modifier.fillMaxSize().padding(6.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(6.dp)
+                        ) {
                             Button(
                                 onClick = { /* Do something */ },
                                 enabled = true,
-                                modifier = Modifier.size(35.dp).align(Alignment.TopCenter),
+                                modifier = Modifier
+                                    .size(35.dp)
+                                    .align(Alignment.TopCenter),
                                 colors = ButtonDefaults.primaryButtonColors(Color(0xFFC5DED5))
                             ) {
                                 Text(text = "elle", color = Color.Black)
                             }
 
                             InlineSlider(
-                                modifier = Modifier.align(Alignment.Center).height(100.dp),
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .height(100.dp),
                                 value = selectedPage,
-                                increaseIcon = { Icon(InlineSliderDefaults.Increase, "Increase", modifier=Modifier.width(50.dp)) },
-                                decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease", modifier=Modifier.width(50.dp)) },
+                                increaseIcon = {
+                                    Icon(
+                                        InlineSliderDefaults.Increase,
+                                        "Increase",
+                                        modifier = Modifier.width(50.dp)
+                                    )
+                                },
+                                decreaseIcon = {
+                                    Icon(
+                                        InlineSliderDefaults.Decrease,
+                                        "Decrease",
+                                        modifier = Modifier.width(50.dp)
+                                    )
+                                },
                                 valueProgression = 0 until maxPages,
-                                onValueChange = { selectedPage = it
+                                onValueChange = {
+                                    selectedPage = it
                                     messageItem = messages[it]
-                                    if (it%2==1) {
+                                    if (it % 2 == 1) {
                                         painterValue = R.drawable.vangogh2
                                     } else {
                                         painterValue = R.drawable.vangogh
@@ -386,7 +373,7 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxWidth(0.55f)
                                     .height(90.dp)
                                     .align(Alignment.Center),
-                                onClick = {  },
+                                onClick = { },
                                 title = { Text(messageItem.toString()) },
                                 backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
                                     backgroundImagePainter = painterResource(id = painterValue)
@@ -395,49 +382,6 @@ class MainActivity : ComponentActivity() {
                                 titleColor = MaterialTheme.colors.onSurface
                             ) { }
                         }
-//                        Scaffold(
-//                            timeText = {
-//                                TimeText()
-//                            },
-//                            vignette = {
-//                                Vignette(vignettePosition = VignettePosition.TopAndBottom)
-//                            },
-//                            positionIndicator = {
-//                                PositionIndicator(
-//                                    scalingLazyListState = ScalingLazyListState()
-//                                )
-//
-//                            }
-//                        ) {
-//                            ScalingLazyColumn(
-//                                modifier = Modifier.fillMaxSize(),
-//                                contentPadding = PaddingValues(
-//                                    top = 28.dp,
-//                                    start = 10.dp,
-//                                    end = 10.dp,
-//                                    bottom = 40.dp
-//                                ),
-//                                verticalArrangement = Arrangement.Center,
-//                                state = scalingLazyListState
-//                            ) {
-//                                items(10) { index ->
-//                                    Chip(
-//                                        modifier = Modifier
-//                                            .fillMaxWidth()
-//                                            .padding(top = 10.dp),
-//                                        label = {
-//                                            Text(
-//                                                modifier = Modifier.fillMaxWidth(),
-//                                                color = MaterialTheme.colors.onError,
-//                                                text = messages[index]
-//                                            )
-//                                        },
-//                                        onClick = {
-//                                        }
-//                                    )
-//                                }
-//                            }
-//                        }
                     }
 
                     composable("braille") {
@@ -460,7 +404,8 @@ class MainActivity : ComponentActivity() {
                                                     100,
                                                     // The default vibration strength of the device.
                                                     VibrationEffect.DEFAULT_AMPLITUDE
-                                                ))
+                                                )
+                                            )
                                             println(currentCombination)
                                         },
                                         enabled = true,
@@ -477,7 +422,8 @@ class MainActivity : ComponentActivity() {
                                                     100,
                                                     // The default vibration strength of the device.
                                                     VibrationEffect.DEFAULT_AMPLITUDE
-                                                ))
+                                                )
+                                            )
                                             println(currentCombination)
                                         },
                                         enabled = true,
@@ -501,7 +447,8 @@ class MainActivity : ComponentActivity() {
                                                     100,
                                                     // The default vibration strength of the device.
                                                     VibrationEffect.DEFAULT_AMPLITUDE
-                                                ))
+                                                )
+                                            )
                                             if (currentCombination.length > 2) {
                                                 if (currentCombination[currentCombination.length - 2] == '2') {
                                                     // END OF CHARACTER
@@ -510,7 +457,8 @@ class MainActivity : ComponentActivity() {
                                                             150,
                                                             // The default vibration strength of the device.
                                                             VibrationEffect.EFFECT_DOUBLE_CLICK
-                                                        ))
+                                                        )
+                                                    )
                                                     toast.setText("Sending: $sentence")
                                                     toast.show()
                                                     sendNoteMessage(sentence)
@@ -533,7 +481,8 @@ class MainActivity : ComponentActivity() {
                                                     100,
                                                     // The default vibration strength of the device.
                                                     VibrationEffect.DEFAULT_AMPLITUDE
-                                                ))
+                                                )
+                                            )
                                             println(currentCombination)
                                         },
                                         enabled = true,
@@ -557,7 +506,8 @@ class MainActivity : ComponentActivity() {
                                                     100,
                                                     // The default vibration strength of the device.
                                                     VibrationEffect.DEFAULT_AMPLITUDE
-                                                ))
+                                                )
+                                            )
                                             if (currentCombination.length > 2) {
                                                 if (currentCombination[currentCombination.length - 2] == '3') {
                                                     // END OF CHARACTER
@@ -584,7 +534,8 @@ class MainActivity : ComponentActivity() {
                                                     100,
                                                     // The default vibration strength of the device.
                                                     VibrationEffect.DEFAULT_AMPLITUDE
-                                                ))
+                                                )
+                                            )
                                             if (currentCombination.length > 2) {
                                                 if (currentCombination[currentCombination.length - 2] == '6') {
                                                     // END OF CHARACTER
@@ -609,141 +560,6 @@ class MainActivity : ComponentActivity() {
 
                                         ) {
                                         Text(text = "6", color = Color.Black)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    composable("Keyboard") {
-                        Scaffold(
-                            timeText = {
-                                TimeText()
-                            },
-                            vignette = {
-                                Vignette(vignettePosition = VignettePosition.TopAndBottom)
-                            },
-                            positionIndicator = {
-                                PositionIndicator(
-                                    scalingLazyListState = ScalingLazyListState()
-                                )
-
-                            }
-                        ) {
-                            ScalingLazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(
-                                    top = 28.dp,
-                                    start = 10.dp,
-                                    end = 10.dp,
-                                    bottom = 40.dp
-                                ),
-                                verticalArrangement = Arrangement.Center,
-                                state = scalingLazyListState
-                            ) {
-                                item {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Button(
-                                            onClick = { /* Do something */ },
-                                            enabled = true,
-                                            modifier = keyboardModifier,
-                                            colors = ButtonDefaults.primaryButtonColors(
-                                                Color(
-                                                    0xFFC5DED5
-                                                )
-                                            )
-                                        ) {
-                                            Text(text = "elle", color = Color.Black)
-                                        }
-                                        Button(
-                                            onClick = { /* Do something */ },
-                                            enabled = true,
-                                            modifier = keyboardModifier,
-                                            colors = ButtonDefaults.primaryButtonColors(
-                                                Color(
-                                                    0xFFC5DED5
-                                                )
-                                            )
-                                        ) {
-                                            Text(text = "elle 2", color = Color.Black)
-                                        }
-                                    }
-                                }
-                                item {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Button(
-                                            onClick = { /* Do something */ },
-                                            enabled = true,
-                                            modifier = keyboardModifier,
-                                            colors = ButtonDefaults.primaryButtonColors(
-                                                Color(
-                                                    0xFFC5DED5
-                                                )
-                                            )
-                                        ) {
-                                            Text(text = "elle", color = Color.Black)
-                                        }
-                                        Button(
-                                            onClick = { /* Do something */ },
-                                            enabled = true,
-                                            modifier = keyboardModifier,
-                                            colors = ButtonDefaults.primaryButtonColors(
-                                                Color(
-                                                    0xFFC5DED5
-                                                )
-                                            )
-                                        ) {
-                                            Text(text = "elle 2", color = Color.Black)
-                                        }
-                                        Button(
-                                            onClick = { /* Do something */ },
-                                            enabled = true,
-                                            modifier = keyboardModifier,
-                                            colors = ButtonDefaults.primaryButtonColors(
-                                                Color(
-                                                    0xFFC5DED5
-                                                )
-                                            )
-                                        ) {
-                                            Text(text = "elle 2", color = Color.Black)
-                                        }
-                                    }
-                                }
-                                item {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Button(
-                                            onClick = { /* Do something */ },
-                                            enabled = true,
-                                            modifier = keyboardModifier,
-                                            colors = ButtonDefaults.primaryButtonColors(
-                                                Color(
-                                                    0xFFC5DED5
-                                                )
-                                            )
-                                        ) {
-                                            Text(text = "elle", color = Color.Black)
-                                        }
-                                        Button(
-                                            onClick = { /* Do something */ },
-                                            enabled = true,
-                                            modifier = keyboardModifier,
-                                            colors = ButtonDefaults.primaryButtonColors(
-                                                Color(
-                                                    0xFFC5DED5
-                                                )
-                                            )
-                                        ) {
-                                            Text(text = "elle 2", color = Color.Black)
-                                        }
                                     }
                                 }
                             }
