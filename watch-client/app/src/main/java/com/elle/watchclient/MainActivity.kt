@@ -1,6 +1,7 @@
 package com.elle.watchclient
 
-import android.os.Bundle
+import android.content.Context
+import android.os.*
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -42,6 +43,8 @@ import org.json.JSONObject
 
 
 class MainActivity : ComponentActivity() {
+
+
 
     val contentModifier = Modifier
         .fillMaxWidth()
@@ -149,6 +152,9 @@ class MainActivity : ComponentActivity() {
             .width(85.dp)
             .padding(all = 0.5.dp)
 
+        val vibrator = this.getSystemService(VIBRATOR_SERVICE) as Vibrator
+        val canVibrate:Boolean = vibrator.hasVibrator()
+
         val toast: Toast = Toast.makeText(this, "Hello", Toast.LENGTH_SHORT)
         val MyRequestQueue: RequestQueue = Volley.newRequestQueue(this)
 
@@ -159,6 +165,7 @@ class MainActivity : ComponentActivity() {
                 "licensekey" to "SEUSSGEISEL",
                 "note" to message
                 )
+
             val request_json = JsonObjectRequest(URL, JSONObject(params as Map<*, *>?),
                 { response ->
                     try {
@@ -363,6 +370,13 @@ class MainActivity : ComponentActivity() {
                                     CustomButton(
                                         onClick = {
                                             currentCombination += "1"
+//                                            tryVibrate(VibrationEffect.Composition.PRIMITIVE_THUD)
+                                            vibrator.vibrate(
+                                                VibrationEffect.createOneShot(
+                                                    100,
+                                                    // The default vibration strength of the device.
+                                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                                ))
                                             println(currentCombination)
                                         },
                                         enabled = true,
@@ -374,6 +388,12 @@ class MainActivity : ComponentActivity() {
                                     CustomButton(
                                         onClick = {
                                             currentCombination += "4"
+                                            vibrator.vibrate(
+                                                VibrationEffect.createOneShot(
+                                                    100,
+                                                    // The default vibration strength of the device.
+                                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                                ))
                                             println(currentCombination)
                                         },
                                         enabled = true,
@@ -392,9 +412,21 @@ class MainActivity : ComponentActivity() {
                                     CustomButton(
                                         onClick = {
                                             currentCombination += "2"
+                                            vibrator.vibrate(
+                                                VibrationEffect.createOneShot(
+                                                    100,
+                                                    // The default vibration strength of the device.
+                                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                                ))
                                             if (currentCombination.length > 2) {
                                                 if (currentCombination[currentCombination.length - 2] == '2') {
                                                     // END OF CHARACTER
+                                                    vibrator.vibrate(
+                                                        VibrationEffect.createOneShot(
+                                                            150,
+                                                            // The default vibration strength of the device.
+                                                            VibrationEffect.EFFECT_DOUBLE_CLICK
+                                                        ))
                                                     toast.setText("Sending: $sentence")
                                                     toast.show()
                                                     sendNoteMessage(sentence)
@@ -412,6 +444,12 @@ class MainActivity : ComponentActivity() {
                                     CustomButton(
                                         onClick = {
                                             currentCombination += "5"
+                                            vibrator.vibrate(
+                                                VibrationEffect.createOneShot(
+                                                    100,
+                                                    // The default vibration strength of the device.
+                                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                                ))
                                             println(currentCombination)
                                         },
                                         enabled = true,
@@ -430,6 +468,12 @@ class MainActivity : ComponentActivity() {
                                     CustomButton(
                                         onClick = {
                                             currentCombination += "3"
+                                            vibrator.vibrate(
+                                                VibrationEffect.createOneShot(
+                                                    100,
+                                                    // The default vibration strength of the device.
+                                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                                ))
                                             if (currentCombination.length > 2) {
                                                 if (currentCombination[currentCombination.length - 2] == '3') {
                                                     // END OF CHARACTER
@@ -451,6 +495,12 @@ class MainActivity : ComponentActivity() {
                                     CustomButton(
                                         onClick = {
                                             currentCombination += "6"
+                                            vibrator.vibrate(
+                                                VibrationEffect.createOneShot(
+                                                    100,
+                                                    // The default vibration strength of the device.
+                                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                                ))
                                             if (currentCombination.length > 2) {
                                                 if (currentCombination[currentCombination.length - 2] == '6') {
                                                     // END OF CHARACTER
@@ -460,6 +510,7 @@ class MainActivity : ComponentActivity() {
                                                             currentCombination.length - 2
                                                         )
                                                     )
+
                                                     toast.setText(sentence)
                                                     toast.show()
                                                     currentCombination = ""
