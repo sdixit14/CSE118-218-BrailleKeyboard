@@ -66,7 +66,7 @@ dependencies {
     implementation("androidx.wear.compose:compose-foundation:1.0.0")
 
     // For Wear Material Design UX guidelines and specifications
-    implementation("androidx.wear.compose:compose-material:1.0.0")
+    implementation("androidx.wear.compose:compose-material:1.0.2")
 
     // For integration between Wear Compose and Androidx Navigation libraries
     implementation("androidx.wear.compose:compose-navigation:1.0.0")

@@ -44,4 +44,19 @@ class MorseMapping {
     }
 
 
+    fun getVibrationSequence(a:String):LongArray {
+        val morseSequence = getMorseCode(a)
+        val vibrationSequence = mutableListOf<Long>(300)
+        for (i in morseSequence) {
+            if (i == '.') {
+                vibrationSequence.add(200)
+            } else if (i == '-') {
+                vibrationSequence.add(1500)
+            }
+            vibrationSequence.add(200)
+        }
+        return vibrationSequence.toLongArray()
+    }
+
+
 }
