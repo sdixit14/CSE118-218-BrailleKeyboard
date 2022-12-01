@@ -58,4 +58,21 @@ class BrailleMapping {
     fun getAlphabetFromNumberString(a:String):String {
         return numberMapping.getOrDefault(String(a.toCharArray().apply { sort() }), KEY_NOT_FOUND)
     }
+
+    fun getVibrationSequence(a:String):LongArray {
+        val indexMapping = mapOf(
+            "1" to 1,
+            "4" to 3,
+            "2" to 5,
+            "5" to 7,
+            "3" to 9,
+            "6" to 11
+        )
+        val defaultSequence = longArrayOf(300, 200, 300, 200, 300, 200, 300, 200, 300, 200, 300, 200, 500)
+        val numbers = getNumberStringFromAlphabet(a)
+        for (i in numbers) {
+            defaultSequence[indexMapping[i.toString()]!!] = 1500
+        }
+        return defaultSequence
+    }
 }

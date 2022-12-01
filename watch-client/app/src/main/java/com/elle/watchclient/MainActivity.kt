@@ -36,6 +36,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONObject
+import java.lang.Character.*
 
 
 class MainActivity : ComponentActivity() {
@@ -124,6 +125,7 @@ class MainActivity : ComponentActivity() {
     @ExperimentalWearMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        var currentMessage:String = "HELLOWWORLD"
         val keyboardModifier = Modifier
             .padding(all = 0.5.dp)
             .width(85.dp)
@@ -142,6 +144,8 @@ class MainActivity : ComponentActivity() {
                 "licensekey" to "SEUSSGEISEL"
             )
 
+
+
             toast.setText("Syncing messages from cloud")
             toast.show()
 
@@ -154,6 +158,7 @@ class MainActivity : ComponentActivity() {
                         toast.setText(text)
                         toast.show()
                         messages = jsonArray.toArrayList().reversed() as MutableList<String>
+                        messages.removeAll(listOf("", null, " "))
                     } catch (e: Exception) {
                         val text: CharSequence? = e.message
                         toast.setText(text)
@@ -343,14 +348,14 @@ class MainActivity : ComponentActivity() {
                                 increaseIcon = {
                                     Icon(
                                         InlineSliderDefaults.Increase,
-                                        "Increase",
+                                        "Previous",
                                         modifier = Modifier.width(50.dp)
                                     )
                                 },
                                 decreaseIcon = {
                                     Icon(
                                         InlineSliderDefaults.Decrease,
-                                        "Decrease",
+                                        "Next",
                                         modifier = Modifier.width(50.dp)
                                     )
                                 },
@@ -373,7 +378,129 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxWidth(0.55f)
                                     .height(90.dp)
                                     .align(Alignment.Center),
-                                onClick = { },
+                                onClick = {
+                                    currentMessage = messageItem
+                                    if (currentMessage.length > 1) {
+                                        swipeDismissableNavController.navigate("letterScreen")
+                                    } else {
+                                        println(currentMessage)
+                                        if (currentMessage[0]=='_' || currentMessage[0]==' ') {
+                                            println("Detected space")
+                                        } else {
+                                            vibrator.vibrate(
+                                                VibrationEffect.createWaveform(
+                                                    BrailleMapping().getVibrationSequence(
+                                                        currentMessage[0].toString()
+                                                    ), -1
+                                                )
+                                            )
+                                            println("Finished vibration for $messageItem")
+                                        }
+                                    }
+                                },
+                                title = { Text(messageItem.toString()) },
+                                backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
+                                    backgroundImagePainter = painterResource(id = painterValue)
+                                ),
+                                contentColor = MaterialTheme.colors.onSurface,
+                                titleColor = MaterialTheme.colors.onSurface
+                            ) { }
+                        }
+                    }
+
+                    composable("letterScreen") {
+                        val maxPages = currentMessage.length
+                        var selectedPage by remember { mutableStateOf(0) }
+                        var messageItem by remember { mutableStateOf(currentMessage[0]) }
+                        var finalValue by remember { mutableStateOf(0) }
+                        var painterValue by remember { mutableStateOf(R.drawable.vangogh) }
+
+                        val animatedSelectedPage by animateFloatAsState(
+                            targetValue = selectedPage.toFloat(),
+                        ) {
+                            finalValue = it.toInt()
+                        }
+
+                        val pageIndicatorState: PageIndicatorState = remember {
+                            object : PageIndicatorState {
+                                override val pageOffset: Float
+                                    get() = animatedSelectedPage - finalValue
+                                override val selectedPage: Int
+                                    get() = finalValue
+                                override val pageCount: Int
+                                    get() = maxPages
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(6.dp)
+                        ) {
+                            Button(
+                                onClick = { /* Do something */ },
+                                enabled = true,
+                                modifier = Modifier
+                                    .size(35.dp)
+                                    .align(Alignment.TopCenter),
+                                colors = ButtonDefaults.primaryButtonColors(Color(0xFFC5DED5))
+                            ) {
+                                Text(text = "elle", color = Color.Black)
+                            }
+
+                            InlineSlider(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .height(100.dp),
+                                value = selectedPage,
+                                increaseIcon = {
+                                    Icon(
+                                        InlineSliderDefaults.Increase,
+                                        "Previous",
+                                        modifier = Modifier.width(50.dp)
+                                    )
+                                },
+                                decreaseIcon = {
+                                    Icon(
+                                        InlineSliderDefaults.Decrease,
+                                        "Next",
+                                        modifier = Modifier.width(50.dp)
+                                    )
+                                },
+                                valueProgression = 0 until maxPages,
+                                onValueChange = {
+                                    selectedPage = it
+                                    messageItem = currentMessage[it]
+                                    if (it % 2 == 1) {
+                                        painterValue = R.drawable.vangogh2
+                                    } else {
+                                        painterValue = R.drawable.vangogh
+                                    }
+                                }
+                            )
+                            HorizontalPageIndicator(
+                                pageIndicatorState = pageIndicatorState
+                            )
+                            TitleCard(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.55f)
+                                    .height(90.dp)
+                                    .align(Alignment.Center),
+                                onClick = {
+                                    println(messageItem)
+                                    if (messageItem=='_' || messageItem==' ') {
+                                        println("Detected space")
+                                    } else {
+                                        vibrator.vibrate(
+                                            VibrationEffect.createWaveform(
+                                                BrailleMapping().getVibrationSequence(
+                                                    messageItem.toString()
+                                                ), -1
+                                            )
+                                        )
+                                        println("Finished vibration for $messageItem")
+                                    }
+                                },
                                 title = { Text(messageItem.toString()) },
                                 backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
                                     backgroundImagePainter = painterResource(id = painterValue)
