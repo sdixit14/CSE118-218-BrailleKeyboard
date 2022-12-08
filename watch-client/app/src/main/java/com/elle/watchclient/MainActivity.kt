@@ -7,8 +7,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -37,9 +38,11 @@ class MainActivity : ComponentActivity() {
     var messages = mutableListOf<String>()
 
     // Custom button composable for Braille rounded corners
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun CustomButton(
         onClick: () -> Unit,
+        onLongClick: (() -> Unit)? = null,
         modifier: Modifier = Modifier,
         enabled: Boolean = true,
         colors: ButtonColors = ButtonDefaults.primaryButtonColors(),
@@ -54,8 +57,9 @@ class MainActivity : ComponentActivity() {
                     minHeight = ButtonDefaults.DefaultButtonSize
                 )
                 .clip(RoundedCornerShape(30))
-                .clickable(
+                .combinedClickable(
                     onClick = onClick,
+                    onLongClick = onLongClick,
                     enabled = enabled,
                     role = Role.Button,
                 )
@@ -208,7 +212,16 @@ class MainActivity : ComponentActivity() {
                                         .fillMaxWidth()
                                         .height(120.dp)
                                         .padding(top = 10.dp),
-                                    onClick = { swipeDismissableNavController.navigate("braille") },
+                                    onClick = {
+                                        vibrator.vibrate(
+                                            VibrationEffect.createOneShot(
+                                                100,
+                                                // The default vibration strength of the device.
+                                                VibrationEffect.DEFAULT_AMPLITUDE
+                                            )
+                                        )
+                                        swipeDismissableNavController.navigate("braille")
+                                    },
                                     title = { Text("Type notes") },
                                     backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
                                         backgroundImagePainter = painterResource(id = R.drawable.vangogh)
@@ -224,8 +237,15 @@ class MainActivity : ComponentActivity() {
                                         .height(120.dp)
                                         .padding(top = 10.dp),
                                     onClick = {
+                                        val vibrationSequence = mutableListOf<Long>(100, 100, 100, 100, 100)
+                                        vibrator.vibrate(
+                                            VibrationEffect.createWaveform(
+                                                vibrationSequence.toLongArray(), -1
+                                            )
+                                        )
                                         globalMorseMode = false
-                                        swipeDismissableNavController.navigate("reader") },
+                                        swipeDismissableNavController.navigate("reader")
+                                    },
                                     title = { Text("Read notes using braille") },
                                     backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
                                         backgroundImagePainter = painterResource(id = R.drawable.vangogh2)
@@ -241,8 +261,15 @@ class MainActivity : ComponentActivity() {
                                         .height(120.dp)
                                         .padding(top = 10.dp),
                                     onClick = {
+                                        val vibrationSequence = mutableListOf<Long>(100, 100, 100, 100, 100, 100, 100)
+                                        vibrator.vibrate(
+                                            VibrationEffect.createWaveform(
+                                                vibrationSequence.toLongArray(), -1
+                                            )
+                                        )
                                         globalMorseMode = true
-                                        swipeDismissableNavController.navigate("reader") },
+                                        swipeDismissableNavController.navigate("reader")
+                                    },
                                     title = { Text("Read notes using morse") },
                                     backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
                                         backgroundImagePainter = painterResource(id = R.drawable.vangogh3)
@@ -322,6 +349,13 @@ class MainActivity : ComponentActivity() {
                                     } else {
                                         painterValue = R.drawable.vangogh
                                     }
+                                    vibrator.vibrate(
+                                        VibrationEffect.createOneShot(
+                                            100,
+                                            // The default vibration strength of the device.
+                                            VibrationEffect.DEFAULT_AMPLITUDE
+                                        )
+                                    )
                                 }
                             )
                             HorizontalPageIndicator(
@@ -440,6 +474,13 @@ class MainActivity : ComponentActivity() {
                                     } else {
                                         painterValue = R.drawable.vangogh
                                     }
+                                    vibrator.vibrate(
+                                        VibrationEffect.createOneShot(
+                                            100,
+                                            // The default vibration strength of the device.
+                                            VibrationEffect.DEFAULT_AMPLITUDE
+                                        )
+                                    )
                                 }
                             )
                             HorizontalPageIndicator(
@@ -548,23 +589,21 @@ class MainActivity : ComponentActivity() {
                                                     VibrationEffect.DEFAULT_AMPLITUDE
                                                 )
                                             )
-                                            if (currentCombination.length > 2) {
-                                                if (currentCombination[currentCombination.length - 2] == '2') {
-                                                    // END OF CHARACTER
-                                                    vibrator.vibrate(
-                                                        VibrationEffect.createOneShot(
-                                                            150,
-                                                            // The default vibration strength of the device.
-                                                            VibrationEffect.EFFECT_DOUBLE_CLICK
-                                                        )
-                                                    )
-                                                    toast.setText("Sending: $sentence")
-                                                    toast.show()
-                                                    sendNoteMessage(sentence)
-                                                    currentCombination = ""
-                                                    sentence = ""
-                                                }
-                                            }
+                                            println(currentCombination)
+                                        },
+                                        onLongClick = {
+                                            vibrator.vibrate(
+                                                VibrationEffect.createOneShot(
+                                                    200,
+                                                    // The default vibration strength of the device.
+                                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                                )
+                                            )
+                                            toast.setText("Sending: $sentence")
+                                            toast.show()
+                                            sendNoteMessage(sentence)
+                                            currentCombination = ""
+                                            sentence = ""
                                         },
                                         enabled = true,
                                         modifier = middleModifier,
@@ -607,17 +646,20 @@ class MainActivity : ComponentActivity() {
                                                     VibrationEffect.DEFAULT_AMPLITUDE
                                                 )
                                             )
-                                            if (currentCombination.length > 2) {
-                                                if (currentCombination[currentCombination.length - 2] == '3') {
-                                                    // END OF CHARACTER
-                                                    sentence += " "
-                                                    toast.setText(sentence)
-                                                    toast.show()
-                                                    currentCombination = ""
-                                                }
-                                            }
-
                                             println(currentCombination)
+                                        },
+                                        onLongClick = {
+                                            vibrator.vibrate(
+                                                VibrationEffect.createOneShot(
+                                                    200,
+                                                    // The default vibration strength of the device.
+                                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                                )
+                                            )
+                                            sentence += " "
+                                            toast.setText(sentence)
+                                            toast.show()
+                                            currentCombination = ""
                                         },
                                         enabled = true,
                                         modifier = keyboardModifier,
@@ -635,23 +677,20 @@ class MainActivity : ComponentActivity() {
                                                     VibrationEffect.DEFAULT_AMPLITUDE
                                                 )
                                             )
-                                            if (currentCombination.length > 2) {
-                                                if (currentCombination[currentCombination.length - 2] == '6') {
-                                                    // END OF CHARACTER
-                                                    sentence += BrailleMapping().getAlphabetFromNumberString(
-                                                        currentCombination.substring(
-                                                            0,
-                                                            currentCombination.length - 2
-                                                        )
-                                                    )
-
-                                                    toast.setText(sentence)
-                                                    toast.show()
-                                                    currentCombination = ""
-                                                }
-                                            }
-
                                             println(currentCombination)
+                                        },
+                                        onLongClick = {
+                                            vibrator.vibrate(
+                                                VibrationEffect.createOneShot(
+                                                    200,
+                                                    // The default vibration strength of the device.
+                                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                                )
+                                            )
+                                            sentence += BrailleMapping().getAlphabetFromNumberString(currentCombination)
+                                            toast.setText(sentence)
+                                            toast.show()
+                                            currentCombination = ""
                                         },
                                         enabled = true,
                                         modifier = keyboardModifier,
